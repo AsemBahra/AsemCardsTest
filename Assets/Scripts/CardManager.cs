@@ -48,6 +48,19 @@ public class CardManager : MonoBehaviour
 
         AdjustGridLayout(cardIDs.Count);
 
+        // Wait for the end of the frame to disable the layout
+        StartCoroutine(DisableGridLayoutAtEndOfFrame());
+    }
+
+    IEnumerator DisableGridLayoutAtEndOfFrame()
+    {
+        yield return new WaitForEndOfFrame();
+
+        GridLayoutGroup gridLayout = cardGrid.GetComponent<GridLayoutGroup>();
+        if (gridLayout != null)
+        {
+            gridLayout.enabled = false;
+        }
     }
 
     IEnumerator FlipAllCardsAtStart()

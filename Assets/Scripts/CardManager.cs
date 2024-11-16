@@ -6,7 +6,8 @@ using UnityEngine;
 public class CardManager : MonoBehaviour
 {
     public CardGenerator cardGenerator; // Reference to the CardGenerator script
-    public TextMeshProUGUI scoreText;
+    public UIManager uiManager; // Reference to the UIManager script
+    public TextMeshProUGUI scoreText; // UI element for the score
 
     private List<Card> cards = new List<Card>();
     private List<Card> flippedCards = new List<Card>();
@@ -15,8 +16,20 @@ public class CardManager : MonoBehaviour
 
     void Start()
     {
-        // Generate cards using the CardGenerator
+        // Subscribe to the UIManager event for grid selection
+        uiManager.OnGridSelected += StartGame;
+    }
+
+    void StartGame(int rows, int columns)
+    {
+        // Set rows and columns in CardGenerator
+        cardGenerator.rows = rows;
+        cardGenerator.columns = columns;
+
+        // Generate cards
         cards = cardGenerator.GenerateCards();
+
+        // Start the game logic
         StartCoroutine(FlipAllCardsAtStart());
     }
 

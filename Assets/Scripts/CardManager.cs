@@ -1,23 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 
 public class CardManager : MonoBehaviour
 {
     public CardGenerator cardGenerator; // Reference to the CardGenerator script
-    public UIManager uiManager; // Reference to the UIManager script
-    public TextMeshProUGUI scoreText; // UI element for the score
 
     private List<Card> cards = new List<Card>();
     private List<Card> flippedCards = new List<Card>();
-    private int score = 0;
     private bool isCheckingMatch = false;
 
     void Start()
     {
         // Subscribe to the UIManager event for grid selection
-        uiManager.OnGridSelected += StartGame;
+        UIManager.Instance.OnGridSelected += StartGame;
     }
 
     void StartGame(int rows, int columns)
@@ -70,8 +66,8 @@ public class CardManager : MonoBehaviour
 
         if (firstCard.cardID == secondCard.cardID)
         {
-            score++;
-            scoreText.text = "Score: " + score;
+            // Notify UIManager to update score
+            UIManager.Instance.UpdateScore(1);
 
             firstCard.SetMatched();
             secondCard.SetMatched();
@@ -79,6 +75,13 @@ public class CardManager : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
             firstCard.gameObject.SetActive(false);
             secondCard.gameObject.SetActive(false);
+
+            // Check if all cards are matched
+            if (CheckWinCondition())
+            {
+                UIManager.Instance.TriggerWinSequence();
+                yield break;
+            }
         }
         else
         {
@@ -98,8 +101,16 @@ public class CardManager : MonoBehaviour
         }
     }
 
-    public bool IsCheckingMatch()
+    private bool CheckWinCondition()
     {
-        return isCheckingMatch;
+        // All cards are matched if no active cards remain
+        foreach (Card card in cards)
+        {
+            if (!card.IsMatched())
+            {
+                return false;
+            }
+        }
+        return true;
     }
 }

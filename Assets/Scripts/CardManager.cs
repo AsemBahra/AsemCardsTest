@@ -215,7 +215,7 @@ public class CardManager : MonoBehaviour
                 }
                 else if (cardState.isFlipped)
                 {
-                    card.FlipFaceUp();
+                    //card.FlipFaceUp();
                 }
                 else
                 {

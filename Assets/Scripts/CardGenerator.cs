@@ -16,73 +16,73 @@ public class CardGenerator : MonoBehaviour
 
     public List<Card> GenerateCards()
     {
-        int requiredCards = rows * columns; // Total number of cards needed
-        List<int> cardIDs = new List<int>();
+        List<Card> newCards = new List<Card>();
 
-        // Limit the number of card faces used
-        int uniqueCards = Mathf.Min(cardFaces.Count, requiredCards / 2);
-
-        // Create card pairs based on the unique cards needed
-        for (int i = 0; i < uniqueCards; i++)
+        // Clear existing children in the grid
+        foreach (Transform child in cardGrid)
         {
-            cardIDs.Add(i);
-            cardIDs.Add(i);
+            Destroy(child.gameObject);
         }
 
-        // Shuffle the card IDs
+        // Adjust grid layout
+        AdjustGridLayout(rows * columns);
+
+        // Generate card IDs
+        List<int> cardIDs = new List<int>();
+        for (int i = 0; i < rows * columns / 2; i++)
+        {
+            cardIDs.Add(i);
+            cardIDs.Add(i); // Add each ID twice for matching pairs
+        }
+
+        // Shuffle card IDs
         for (int i = 0; i < cardIDs.Count; i++)
         {
             int temp = cardIDs[i];
-            int randomIndex = Random.Range(i, cardIDs.Count);
+            int randomIndex = UnityEngine.Random.Range(i, cardIDs.Count);
             cardIDs[i] = cardIDs[randomIndex];
             cardIDs[randomIndex] = temp;
         }
 
-        // Create only the required number of cards
-        for (int i = 0; i < requiredCards && i < cardIDs.Count; i++)
+        // Instantiate cards
+        foreach (int id in cardIDs)
         {
             GameObject newCard = Instantiate(cardPrefab, cardGrid);
             Card card = newCard.GetComponent<Card>();
-            card.SetCard(cardFaces[cardIDs[i]], cardIDs[i]);
-            cards.Add(card);
+            card.SetCard(cardFaces[id], id);
+            newCards.Add(card);
         }
 
-        // Adjust grid layout to balance spacing
-        AdjustGridLayout();
-
-        // Wait for Unity to complete layout calculations
         StartCoroutine(DisableGridLayoutAtEndOfFrame());
-
-        return cards;
+        return newCards;
     }
 
-    private void AdjustGridLayout()
+    
+    private void AdjustGridLayout(int cardCount)
     {
         GridLayoutGroup gridLayout = cardGrid.GetComponent<GridLayoutGroup>();
+
+        int columns = Mathf.CeilToInt(Mathf.Sqrt(cardCount));
+        int rows = Mathf.CeilToInt((float)cardCount / columns);
 
         RectTransform gridRect = cardGrid.GetComponent<RectTransform>();
         float cardGridWidth = gridRect.rect.width;
         float cardGridHeight = gridRect.rect.height;
 
-        // Adjust cell size dynamically based on rows, columns, and spacing
-        float spacing = 10; // Adjustable spacing between cards
-        float padding = 20; // Adjustable padding around the grid
+        gridLayout.spacing = new Vector2(10, 10);
+        gridLayout.padding = new RectOffset(10, 10, 10, 10);
 
-        gridLayout.spacing = new Vector2(spacing, spacing);
-        gridLayout.padding = new RectOffset((int)padding, (int)padding, (int)padding, (int)padding);
+        float cellWidth = (cardGridWidth - gridLayout.padding.left - gridLayout.padding.right - (columns - 1) * gridLayout.spacing.x) / columns;
+        float cellHeight = (cardGridHeight - gridLayout.padding.top - gridLayout.padding.bottom - (rows - 1) * gridLayout.spacing.y) / rows;
 
-        float cellWidth = (cardGridWidth - gridLayout.padding.left - gridLayout.padding.right - (columns - 1) * spacing) / columns;
-        float cellHeight = (cardGridHeight - gridLayout.padding.top - gridLayout.padding.bottom - (rows - 1) * spacing) / rows;
-
-        // Apply the calculated cell size
         gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         gridLayout.constraintCount = columns;
         gridLayout.cellSize = new Vector2(cellWidth, cellHeight);
     }
-
-    private IEnumerator DisableGridLayoutAtEndOfFrame()
+    public IEnumerator DisableGridLayoutAtEndOfFrame()
     {
         yield return new WaitForEndOfFrame();
+
         
         GridLayoutGroup gridLayout = cardGrid.GetComponent<GridLayoutGroup>();
         if (gridLayout != null)
@@ -90,4 +90,29 @@ public class CardGenerator : MonoBehaviour
             gridLayout.enabled = false;
         }
     }
+    public List<Card> GenerateCardsFromSavedState(List<CardState> savedCardStates)
+    {
+        List<Card> newCards = new List<Card>();
+
+        // Clear existing children in the grid
+        foreach (Transform child in cardGrid)
+        {
+            Destroy(child.gameObject);
+        }
+
+        // Adjust grid layout
+        AdjustGridLayout(savedCardStates.Count);
+
+        // Generate cards based on saved states
+        foreach (var cardState in savedCardStates)
+        {
+            GameObject newCard = Instantiate(cardPrefab, cardGrid);
+            Card card = newCard.GetComponent<Card>();
+            card.SetCard(cardFaces[cardState.cardID], cardState.cardID);
+            newCards.Add(card);
+        }
+
+        return newCards;
+    }
+
 }

@@ -1,11 +1,11 @@
-using TMPro;
 using System;
-using UnityEngine;
-using DG.Tweening;
-using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using DG.Tweening;
 
 public class UIManager : MonoBehaviour
 {
@@ -15,6 +15,8 @@ public class UIManager : MonoBehaviour
     public GameObject gameUI; // Main game UI
     public TMP_Dropdown gridSizeDropdown; // TMP Dropdown for grid size selection
     public Button startButton; // Button to start the game
+    public Button saveButton; // Button to save the game
+    public Button loadButton; // Button to load the game
     public GameObject winningPanel; // The panel displayed when the player wins
     public TextMeshProUGUI scoreText; // UI element for displaying the score
     public float restartDelay = 3f; // Delay before restarting the scene
@@ -23,18 +25,15 @@ public class UIManager : MonoBehaviour
 
     private Dictionary<string, Vector2Int> gridOptions = new Dictionary<string, Vector2Int>
     {
-        { "2x2", new Vector2Int(2, 2) },
-        { "2x3", new Vector2Int(2, 3) },
-        { "3x4", new Vector2Int(3, 4) },
         { "4x4", new Vector2Int(4, 4) },
-        { "5x4", new Vector2Int(5, 4) }
+        { "5x4", new Vector2Int(5, 4) },
+        { "2x2", new Vector2Int(2, 2) }
     };
 
     private int score = 0; // Internal score tracking
 
-    void Awake()
+    private void Awake()
     {
-        // Implement singleton pattern
         if (Instance == null)
         {
             Instance = this;
@@ -45,24 +44,25 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    void Start()
+    private void Start()
     {
         // Populate the dropdown
         PopulateDropdown();
 
         // Set default UI state
-        gridSelectionPanel.SetActive(true);
-        gameUI.SetActive(false);
+        ShowGridSelection();
 
         // Hide the winning panel initially
         winningPanel.transform.localScale = Vector3.zero;
         winningPanel.SetActive(false);
 
-        // Hook up the start button
+        // Hook up button listeners
         startButton.onClick.AddListener(OnStartButtonClicked);
+        saveButton.onClick.AddListener(() => CardManager.Instance.SaveGame());
+        loadButton.onClick.AddListener(() => CardManager.Instance.LoadGame());
     }
 
-    void PopulateDropdown()
+    private void PopulateDropdown()
     {
         gridSizeDropdown.ClearOptions();
 
@@ -74,7 +74,7 @@ public class UIManager : MonoBehaviour
         gridSizeDropdown.value = 0;
     }
 
-    void OnStartButtonClicked()
+    private void OnStartButtonClicked()
     {
         // Get the selected grid size
         string selectedOption = gridSizeDropdown.options[gridSizeDropdown.value].text;
@@ -83,9 +83,20 @@ public class UIManager : MonoBehaviour
         // Notify CardManager
         OnGridSelected?.Invoke(gridSize.x, gridSize.y);
 
-        // Hide grid selection UI and show game UI
+        // Show the game UI
+        ShowGameUI();
+    }
+
+    public void ShowGameUI()
+    {
         gridSelectionPanel.SetActive(false);
         gameUI.SetActive(true);
+    }
+
+    public void ShowGridSelection()
+    {
+        gridSelectionPanel.SetActive(true);
+        gameUI.SetActive(false);
     }
 
     public void UpdateScore(int increment)
@@ -93,7 +104,10 @@ public class UIManager : MonoBehaviour
         score += increment;
         scoreText.text = "Score: " + score;
     }
-
+    public int GetScore()
+    {
+        return score;
+    }
     public void TriggerWinSequence()
     {
         // Show the winning panel with a tween

@@ -1222,6 +1222,7 @@ MonoBehaviour:
   loadButton: {fileID: 1232059118}
   winningPanel: {fileID: 532521820}
   scoreText: {fileID: 2114139583}
+  warningText: {fileID: 1464991367}
   restartDelay: 3
 --- !u!1 &807664170
 GameObject:
@@ -2550,7 +2551,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1464991368
 RectTransform:
   m_ObjectHideFlags: 0

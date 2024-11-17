@@ -87,6 +87,7 @@ public class CardManager : MonoBehaviour
             UIManager.Instance.UpdateScore(1);
             firstCard.SetMatched();
             secondCard.SetMatched();
+            AudioManager.Instance.PlayMatchSound();
 
             yield return new WaitForSeconds(0.5f);
 
@@ -96,6 +97,8 @@ public class CardManager : MonoBehaviour
             if (CheckWinCondition())
             {
                 UIManager.Instance.TriggerWinSequence();
+                AudioManager.Instance.PlayGameOverSound();
+
                 yield break;
             }
         }
@@ -103,6 +106,8 @@ public class CardManager : MonoBehaviour
         {
             // No match
             yield return new WaitForSeconds(0.5f);
+            AudioManager.Instance.PlayMismatchSound();
+
             firstCard.FlipFaceDown();
             secondCard.FlipFaceDown();
         }
@@ -162,6 +167,7 @@ public class CardManager : MonoBehaviour
         string path = Path.Combine(Application.persistentDataPath, SaveFileName);
         if (!File.Exists(path))
         {
+            UIManager.Instance.ToggleWarning(true);
             Debug.LogWarning("No save file found!");
             return;
         }

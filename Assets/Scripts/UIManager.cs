@@ -19,15 +19,18 @@ public class UIManager : MonoBehaviour
     public Button loadButton; // Button to load the game
     public GameObject winningPanel; // The panel displayed when the player wins
     public TextMeshProUGUI scoreText; // UI element for displaying the score
+    public GameObject warningText; // Element for warnning  text
     public float restartDelay = 3f; // Delay before restarting the scene
 
     public event Action<int, int> OnGridSelected; // Event to notify the selected grid size
 
     private Dictionary<string, Vector2Int> gridOptions = new Dictionary<string, Vector2Int>
     {
-        { "4x4", new Vector2Int(4, 4) },
-        { "5x4", new Vector2Int(5, 4) },
-        { "2x2", new Vector2Int(2, 2) }
+        { "2x2", new Vector2Int(2, 2) },
+        { "2x3", new Vector2Int(2, 3) },
+        { "3x3", new Vector2Int(3, 3) },
+        { "3x4", new Vector2Int(3, 4) },
+        { "4x5", new Vector2Int(4, 5) }
     };
 
     private int score = 0; // Internal score tracking
@@ -107,6 +110,10 @@ public class UIManager : MonoBehaviour
     public int GetScore()
     {
         return score;
+    }
+    public void ToggleWarning(bool flag)
+    {
+        warningText.SetActive(flag);
     }
     public void TriggerWinSequence()
     {

@@ -28,6 +28,7 @@ public class Card : MonoBehaviour
     {
         if (isFlipped || isMatched) return; // Prevent flipping if already flipped or matched
         FlipCardAnimation();
+        AudioManager.Instance.PlayFlipSound();
         cardManager.AddFlippedCard(this);
     }
 
